@@ -86,6 +86,9 @@ RUN rm /etc/nginx/sites-enabled/project.conf.template
 
 ARG C9SDK_PASSWORD=password
 
+COPY .bashrc /tmp/.bashrc
+RUN cat /tmp/.bashrc >> /root/.bashrc
+
 CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
 
 EXPOSE 8080
