@@ -1,0 +1,1 @@
+docker buildx build --platform linux/amd64 -f Dockerfile.railway -t local-test-railway:latest .

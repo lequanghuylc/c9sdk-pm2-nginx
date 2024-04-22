@@ -1,0 +1,1 @@
+docker buildx build --platform linux/amd64 -t lequanghuylc/c9sdk-pm2-ubuntu:latest .

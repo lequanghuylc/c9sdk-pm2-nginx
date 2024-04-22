@@ -1,0 +1,95 @@
+FROM nginx:1.25.3-bookworm
+
+USER root
+
+ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-l", "-euxo", "pipefail", "-c"]
+RUN apt-get update && apt-get install -y -q --no-install-recommends \
+        apt-transport-https \
+        build-essential \
+        ca-certificates \
+        curl \
+        git \
+        libssl-dev \
+        wget \
+    && rm -rf /var/lib/apt/lists/*
+ADD ./nginx/nginx.conf.template /etc/nginx/nginx.conf.template
+# RUN envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+
+ENV NVM_DIR /usr/local/nvm
+
+RUN mkdir -p "$NVM_DIR"; \
+    curl -o- \
+        "https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh" | \
+        bash \
+    ; \
+    source $NVM_DIR/nvm.sh; \
+    nvm install 12
+
+RUN command -v nvm; \
+    command -v node; \
+    node --version; \
+    command -v npm; \
+    npm --version
+
+RUN npm i -g pm2 yarn
+
+# ADD ./package.json /tmp/package.json
+# RUN cd /tmp && yarn install
+# RUN mkdir -p /var/www/pm2-server-managers && cp -a /tmp/node_modules /var/www/pm2-server-managers
+
+RUN apt-get update
+RUN apt-get install -y vim nano
+
+RUN apt-get update \
+    && apt-get install -y gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+      --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# WORKDIR /var/www/pm2-server-managers
+# RUN cd /var/www/pm2-server-managers && mkdir -p uploads
+# RUN cd /var/www/pm2-server-managers && touch log.txt
+# ADD . /var/www/pm2-server-managers
+# CMD pm2 start pm2.config.js && envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -c /etc/nginx/nginx.conf && pm2 log 0
+
+WORKDIR /root
+
+RUN git clone https://github.com/c9/core.git c9sdk
+
+WORKDIR /root/c9sdk
+
+ARG PYTHON_VERSION=2.7.5
+RUN apt-get update \
+  && apt-get install -y wget gcc make openssl libffi-dev libgdbm-dev libsqlite3-dev libssl-dev zlib1g-dev \
+  && apt-get clean
+
+WORKDIR /tmp/
+# Build Python from source
+RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz \
+  && tar --extract -f Python-$PYTHON_VERSION.tgz \
+  && cd ./Python-$PYTHON_VERSION/ \
+  && ./configure --enable-optimizations --prefix=/usr/local \
+  && make && make install \
+  && cd ../ \
+  && rm -r ./Python-$PYTHON_VERSION*
+
+RUN python --version
+
+WORKDIR /root/c9sdk
+
+RUN apt install -y lld libevent-dev libbsd-dev
+# RUN gcc -g te1.c -L/usr/local/lib -levent  -levent_openssl
+
+RUN wget https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz
+RUN tar -xzf libevent-2.1.8-stable.tar.gz
+RUN cd libevent-2.1.8-stable && ./configure
+
+RUN scripts/install-sdk.sh
+
+CMD pm2 start server.js --name "c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -c /etc/nginx/nginx.conf && pm2 log 0
+
+EXPOSE 8080

@@ -1,0 +1,7 @@
+FROM lequanghuylc/c9sdk-pm2-ubuntu:latest
+
+WORKDIR /root/c9sdk
+
+CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
+
+EXPOSE 8080
