@@ -89,6 +89,22 @@ ARG C9SDK_PASSWORD=password
 COPY .bashrc /tmp/.bashrc
 RUN cat /tmp/.bashrc >> /root/.bashrc
 
-CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
+RUN apt install cron sudo zip ruby-full -y
+RUN gem install bundler
 
+COPY .profile /tmp/.profile
+RUN cat /tmp/.profile >> /root/.profile
+
+# CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
+
+# install envsubst & supervisor
+RUN apt install -y supervisor gettext-base
+# use envsubst to convert supervisord.conf.template to supervisord.conf
+COPY supervisord.conf.template /etc/supervisor/conf.d/
+RUN envsubst < /etc/supervisor/conf.d/supervisord.conf.template > /etc/supervisor/conf.d/supervisord.conf
+COPY pm2-server-managers /root/pm2-server-managers
+
+WORKDIR /root/pm2-server-managers
+RUN chmod a+x detect-git-repo-deployment.sh
+CMD supervisord -c /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 8080
