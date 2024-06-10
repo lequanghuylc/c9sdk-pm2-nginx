@@ -3,8 +3,9 @@ FROM lequanghuylc/c9sdk-pm2-ubuntu:latest
 # WORKDIR /root/c9sdk
 
 # CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
-COPY supervisord.conf.template /etc/supervisor/conf.d/
-RUN envsubst < /etc/supervisor/conf.d/supervisord.conf.template > /etc/supervisor/conf.d/supervisord.conf
-CMD cat /etc/supervisor/conf.d/supervisord.conf && echo "===\n" && supervisord -c /etc/supervisor/conf.d/supervisord.conf
+WORKDIR /root
+COPY prepare_supervisord.sh .
+RUN chmod +x prepare_supervisord.sh
+CMD /root/prepare_supervisord.sh && echo "===\n" && supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 8080

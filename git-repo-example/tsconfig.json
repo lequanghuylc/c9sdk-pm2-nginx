@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "module": "commonjs",
+    "target": "es2017",
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "baseUrl": "src",
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": [
+    ".",
+    "src"
+  ],
+  "exclude": [
+    "pm2.config.js"
+  ]
+}
