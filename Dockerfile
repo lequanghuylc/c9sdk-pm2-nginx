@@ -104,6 +104,10 @@ COPY supervisord.conf.template /etc/supervisor/conf.d/
 RUN envsubst < /etc/supervisor/conf.d/supervisord.conf.template > /etc/supervisor/conf.d/supervisord.conf
 COPY pm2-server-managers /root/pm2-server-managers
 
+WORKDIR /root
+COPY initial_command.sh .
+RUN chmod +x initial_command.sh
+
 WORKDIR /root/pm2-server-managers
 RUN chmod a+x detect-git-repo-deployment.sh
 CMD supervisord -c /etc/supervisor/conf.d/supervisord.conf

@@ -9,6 +9,7 @@ This Docker container is a IDE / Code editor, built from [C9 SDK](https://github
 - `C9SDK_PASSWORD`: password for basic auth. it would be publically accessible if this env is not defined
 - `GIT_REPO`: automatic git repo deployment
 - `GIT_BRANCH`: target branch, if not present, default branch will be used.
+- `INITIAL_COMMAND`: custom command that can be used for installing custom dependencies or even start your git repo your own way
 
 ## What is the best use case for this?
 

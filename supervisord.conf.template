@@ -14,3 +14,6 @@ command=nginx -g "daemon off;"
 
 [program:cron]
 command=cron -f
+
+[program:initial_command]
+command=/root/initial_command.sh
