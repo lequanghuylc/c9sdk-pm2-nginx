@@ -1,1 +1,1 @@
-docker buildx build --platform linux/amd64 -f Dockerfile.railway -t local-test-railway:latest .
+docker buildx build --platform linux/amd64 -f Dockerfile.railway --no-cache -t lequanghuylc/c9sdk-pm2-ubuntu:railway .
