@@ -16,9 +16,7 @@ exec 2>&1
 
 cd /root && git clone $GIT_REPO the-project
 cd /root/the-project
-if [ -z "$GIT_BRANCH" ]; then
-  git checkout $GIT_BRANCH
-fi
+if [ -z "$GIT_BRANCH" ]; then echo "Using the default branch"; else echo "Checkout branch: $GIT_BRANCH" && git checkout $GIT_BRANCH;  fi;
 
 cd the-project
 # check if deployments dir is present
