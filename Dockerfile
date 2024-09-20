@@ -111,4 +111,9 @@ RUN chmod +x initial_command.sh
 WORKDIR /root/pm2-server-managers
 RUN chmod a+x detect-git-repo-deployment.sh
 CMD supervisord -c /etc/supervisor/conf.d/supervisord.conf
+
+# export all env to /env.sh file
+RUN touch /env.sh
+RUN eval $(printenv | awk -F= '{print "export " "\""$1"\"""=""\""$2"\"" }' >> /env.sh)
+RUN chmod +x /env.sh
 EXPOSE 8080

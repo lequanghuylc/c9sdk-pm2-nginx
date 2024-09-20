@@ -17,3 +17,5 @@ command=cron -f
 
 [program:initial_command]
 command=/root/initial_command.sh
+stdout_logfile=/root/initial_command.log
+stderr_logfile=/root/initial_command_error.log
