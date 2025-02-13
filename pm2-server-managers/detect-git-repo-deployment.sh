@@ -14,11 +14,13 @@ exec 2>&1
 
 # check if env GIT_BRANCH is set, if yes, clone that branch, if not, clone default
 
-cd /root && git clone $GIT_REPO the-project
-cd /root/the-project
+cd /root && git clone $GIT_REPO the-project2
+cd /root/the-project2
 if [ -z "$GIT_BRANCH" ]; then echo "Using the default branch"; else echo "Checkout branch: $GIT_BRANCH" && git checkout $GIT_BRANCH;  fi;
-
-cd the-project
+cd /root
+rsync -a --ignore-existing the-project2/ the-project/
+rm -rf /root/the-project2
+cd /root/the-project
 # check if deployments dir is present
 if [ ! -d "deployments" ]; then
   echo "deployments dir not found, existing."

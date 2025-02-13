@@ -1,5 +1,7 @@
 ## Intro
 
+![demo](demo.png)
+
 This Docker container is a IDE / Code editor, built from [C9 SDK](https://github.com/c9/core). With C9 IDE you can set up development environments in the cloud. It comes with [nvm](https://nvm.sh/), [pm2](https://pm2.keymetrics.io/) and [nginx](https://www.nginx.com/) that can help you publish your application pulically accessible to the world.
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EjubUu?referralCode=kmHOLH)

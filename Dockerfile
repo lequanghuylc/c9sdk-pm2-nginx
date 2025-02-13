@@ -104,6 +104,8 @@ COPY supervisord.conf.template /etc/supervisor/conf.d/
 RUN envsubst < /etc/supervisor/conf.d/supervisord.conf.template > /etc/supervisor/conf.d/supervisord.conf
 COPY pm2-server-managers /root/pm2-server-managers
 
+RUN apt update && apt install rsync -y
+
 WORKDIR /root
 COPY initial_command.sh .
 RUN chmod +x initial_command.sh
