@@ -123,13 +123,22 @@ ARG C9SDK_PASSWORD=password
 ENV C9_SUB_PATH=/ide
 
 COPY .bashrc /tmp/.bashrc
-RUN cat /tmp/.bashrc >> /root/.bashrc
+# NOTE: the appended file must end with a newline. Installers (Claude Code, Cursor agent...)
+# tell users to run `echo 'export PATH=...' >> ~/.bashrc`; without the trailing newline that
+# line is glued to the last one ("fiexport PATH=...") and ~/.bashrc stops working.
+# `sed '$a\'` adds the newline only when it's missing (also covers future edits of .bashrc).
+# Old line (rollback):
+# RUN cat /tmp/.bashrc >> /root/.bashrc
+RUN sed '$a\' /tmp/.bashrc >> /root/.bashrc
 
 RUN apt install cron sudo zip ruby-full -y
 RUN gem install bundler
 
 COPY .profile /tmp/.profile
-RUN cat /tmp/.profile >> /root/.profile
+# same as ~/.bashrc above: always end with a newline
+# Old line (rollback):
+# RUN cat /tmp/.profile >> /root/.profile
+RUN sed '$a\' /tmp/.profile >> /root/.profile
 
 # CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
 
