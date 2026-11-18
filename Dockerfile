@@ -138,7 +138,8 @@ RUN apt update && apt install rsync -y
 
 WORKDIR /root
 COPY initial_command.sh .
-RUN chmod +x initial_command.sh
+COPY prepare_supervisord.sh .
+RUN chmod +x initial_command.sh prepare_supervisord.sh
 
 WORKDIR /root/pm2-server-managers
 RUN chmod a+x detect-git-repo-deployment.sh ensure-ide-route.sh
@@ -149,6 +150,6 @@ RUN touch /env.sh
 RUN printenv | while IFS='=' read -r k v; do printf 'export %s="%s"\n' "$k" "$(printf '%s' "$v" | sed 's/"/\\"/g')"; done > /env.sh
 RUN chmod +x /env.sh
 
-# export env again at run time
-CMD printenv | while IFS='=' read -r k v; do printf 'export %s="%s"\n' "$k" "$(printf '%s' "$v" | sed 's/"/\\"/g')"; done > /env.sh && supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Re-run envsubst at start so runtime secrets (e.g. C9SDK_PASSWORD) land in supervisord.conf
+CMD /root/prepare_supervisord.sh && printenv | while IFS='=' read -r k v; do printf 'export %s="%s"\n' "$k" "$(printf '%s' "$v" | sed 's/"/\\"/g')"; done > /env.sh && supervisord -c /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 8080

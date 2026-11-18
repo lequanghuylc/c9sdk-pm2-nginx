@@ -1,13 +1,11 @@
-FROM lequanghuylc/c9sdk-pm2-ubuntu:latest
+# Deprecated as a build entrypoint.
+#
+# Previously: FROM lequanghuylc/c9sdk-pm2-ubuntu:latest (required a Hub push).
+# Now: Railway builds the in-repo Dockerfile so you can deploy an untested
+# branch without publishing. See railway.json → build.dockerfilePath.
+#
+# Local: docker buildx build --platform linux/amd64 -f Dockerfile \
+#          -t lequanghuylc/c9sdk-pm2-ubuntu:railway .
 
-# WORKDIR /root/c9sdk
-
-# CMD pm2 start server.js --name="c9sdk" -- -w / -l 0.0.0.0 -p 3399 -a c9sdk:${C9SDK_PASSWORD} && nginx -c /etc/nginx/nginx.conf && pm2 log 0
-WORKDIR /root
-COPY prepare_supervisord.sh .
-# COPY initial_command.sh .
-RUN chmod +x prepare_supervisord.sh
-# RUN chmod +x initial_command.sh
-CMD /root/prepare_supervisord.sh && echo "===\n" && printenv | while IFS='=' read -r k v; do printf 'export %s="%s"\n' "$k" "$(printf '%s' "$v" | sed 's/"/\\"/g')"; done > /env.sh && echo "===\n" && supervisord -c /etc/supervisor/conf.d/supervisord.conf
-
-EXPOSE 8080
+FROM ubuntu:22.04
+RUN echo "ERROR: Use Dockerfile (railway.json points there). Dockerfile.railway no longer FROM the Hub image." >&2 && exit 1
