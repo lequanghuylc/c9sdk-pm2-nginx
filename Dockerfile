@@ -1,16 +1,23 @@
 # Use the official Ubuntu 22.04 LTS base image
 FROM ubuntu:22.04
 
-# Install nginx
+# Install nginx and remove the default site in the SAME layer.
+# NOTE: deleting a file in a later RUN only adds a "whiteout" to the image. Some container
+# runtimes (seen on the MSC dev server: containerd overlay) don't apply those whiteouts, so
+# files deleted in a later layer come back at run time. Never rely on cross-layer deletes here.
+# Old lines (rollback):
+# RUN apt-get update && \
+#   apt-get install -y nginx
+# RUN rm /etc/nginx/sites-enabled/default
 RUN apt-get update && \
-  apt-get install -y nginx
+  apt-get install -y nginx && \
+  rm -f /etc/nginx/sites-enabled/default
 
-# Remove the default nginx configuration
-RUN rm /etc/nginx/sites-enabled/default
-
-# Optional: Add a custom nginx configuration file
-# You can create a file named 'nginx.conf' and add it to the container
-COPY ./nginx/project.conf.template /etc/nginx/sites-enabled/
+# NOTE: nginx/project.conf.template is a full nginx.conf ("user" directive), it must never be
+# in sites-enabled. It used to be copied here and deleted later, which brought it back on the
+# MSC dev server (see above) and broke nginx: "user" directive is not allowed here.
+# Old line (rollback):
+# COPY ./nginx/project.conf.template /etc/nginx/sites-enabled/
 
 RUN apt-get update && apt-get install -y -q --no-install-recommends \
   apt-transport-https \
@@ -106,7 +113,8 @@ RUN NO_PULL=1 scripts/install-sdk.sh
 COPY ./nginx/c9-ide.conf /etc/nginx/snippets/c9-ide.conf
 COPY ./nginx/project.conf /etc/nginx/sites-enabled/
 
-RUN rm /etc/nginx/sites-enabled/project.conf.template
+# Old line (rollback, see the NOTE at the top: the template is no longer copied):
+# RUN rm /etc/nginx/sites-enabled/project.conf.template
 
 ARG C9SDK_PASSWORD=password
 
