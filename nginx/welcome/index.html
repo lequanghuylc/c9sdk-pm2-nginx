@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1d2330;
+      --muted: #5b6475;
+      --border: #e2e5eb;
+      --accent: #2f6fde;
+      --accent-text: #ffffff;
+      --code-bg: #eef1f5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12151b;
+        --card: #1a1f27;
+        --text: #e6e9ef;
+        --muted: #9aa3b2;
+        --border: #2a313c;
+        --accent: #5b8ff0;
+        --accent-text: #0d1117;
+        --code-bg: #232a35;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    main { max-width: 720px; margin: 0 auto; padding: 56px 16px; }
+    h1 { font-size: 30px; line-height: 1.25; margin: 0 0 8px; }
+    h2 { font-size: 18px; margin: 0 0 12px; }
+    p { margin: 0 0 12px; }
+    .lead { color: var(--muted); margin-bottom: 28px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+    }
+    .button {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--accent-text);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 8px;
+      margin-top: 4px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      margin: 0 0 12px;
+    }
+    pre code { background: none; padding: 0; }
+    ul { margin: 0 0 12px; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    .muted { color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Welcome 👋</h1>
+    <p class="lead">This server is up and running, but no application has been deployed to the root path yet.</p>
+
+    <section class="card">
+      <h2>Cloud9 IDE</h2>
+      <p>The online code editor is available at <code>/ide</code>.</p>
+      <a class="button" href="/ide/">Open the IDE</a>
+    </section>
+
+    <section class="card">
+      <h2>Deploy your application here</h2>
+      <p>Your app replaces this page as soon as it listens on port <code>3000</code>. The easiest way is automatic git deployment — start the container with:</p>
+      <ul>
+        <li><code>GIT_REPO</code> — https url of your repository, including an access token</li>
+        <li><code>GIT_BRANCH</code> — optional, the default branch is used otherwise</li>
+        <li><code>DOMAIN_NAME</code> — your domain, e.g. <code>example.com</code> (the IDE stays at <code>example.com/ide</code>)</li>
+      </ul>
+      <p>The repository is cloned to <code>/root/the-project</code> and needs a <code>deployments</code> folder:</p>
+<pre><code>deployments/
+  deploy.sh        # install dependencies and start the app (e.g. with pm2)
+  setup-nginx.sh   # nginx config for DOMAIN_NAME
+  setup-cron.sh    # optional: pull and redeploy new commits</code></pre>
+      <p class="muted">See <code>git-repo-example</code> in the c9sdk-pm2-nginx repository for a complete example.</p>
+    </section>
+
+    <section class="card">
+      <h2>Or run something by hand</h2>
+      <p>Open a terminal in the IDE and start any server on port <code>3000</code>, for example:</p>
+<pre><code>python3 -m http.server 3000</code></pre>
+      <p class="muted">Reload this page afterwards.</p>
+    </section>
+  </main>
+</body>
+</html>

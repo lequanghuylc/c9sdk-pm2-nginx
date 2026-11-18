@@ -111,7 +111,7 @@ RUN rm /etc/nginx/sites-enabled/project.conf.template
 ARG C9SDK_PASSWORD=password
 
 # The IDE is served at http://<domain>/ide/ (see nginx/c9-ide.conf), the root path is
-# left for the main application (sample app in /root/sample-app until a GIT_REPO is deployed)
+# left for the main application (static welcome page while nothing listens on port 3000)
 ENV C9_SUB_PATH=/ide
 
 COPY .bashrc /tmp/.bashrc
@@ -131,8 +131,7 @@ RUN apt install -y supervisor gettext-base
 COPY supervisord.conf.template /etc/supervisor/conf.d/
 RUN envsubst < /etc/supervisor/conf.d/supervisord.conf.template > /etc/supervisor/conf.d/supervisord.conf
 COPY pm2-server-managers /root/pm2-server-managers
-COPY sample-app /root/sample-app
-RUN chmod +x /root/sample-app/start.sh
+COPY nginx/welcome /var/www/welcome
 
 RUN apt update && apt install rsync -y
 

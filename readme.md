@@ -11,7 +11,7 @@ This Docker container is a IDE / Code editor, built from [C9 SDK](https://github
 nginx listens on port `8080`:
 
 - `/ide/` → the Cloud9 IDE (basic auth `c9sdk:$C9SDK_PASSWORD`)
-- `/` → the main application on `127.0.0.1:3000`. Until a `GIT_REPO` is deployed, a small sample app ([sample-app](sample-app)) answers there.
+- `/` → the main application on `127.0.0.1:3000`. While nothing listens there (no `GIT_REPO` deployed yet), a static welcome page ([nginx/welcome](nginx/welcome/index.html)) is shown with a link to the IDE and how to deploy.
 
 So one domain is enough: `https://domain.com/` for the app and `https://domain.com/ide/` for the IDE.
 
@@ -26,9 +26,9 @@ location, `nginx -t` fails), it is left unchanged.
 - `C9SDK_PASSWORD`: password for basic auth. it would be publically accessible if this env is not defined
 - `GIT_REPO`: automatic git repo deployment
 - `GIT_BRANCH`: target branch, if not present, default branch will be used.
+- `DOMAIN_NAME`: domain of the deployed project (used by its `setup-nginx.sh`). The IDE is available at `$DOMAIN_NAME/ide/` too.
 - `INITIAL_COMMAND`: custom command that can be used for installing custom dependencies or even start your git repo your own way
 - `C9_SUB_PATH`: sub path of the IDE, default `/ide`. If you change it, change `nginx/c9-ide.conf` too. Set it to an empty string to serve the IDE at the root again.
-- `SAMPLE_APP`: set to `false` to disable the sample root app (it is disabled automatically when `GIT_REPO` is set).
 
 ## Build args
 
