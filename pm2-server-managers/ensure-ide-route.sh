@@ -30,17 +30,24 @@ if [ -z "$C9_SUB_PATH" ]; then
 fi
 
 ensure() {
-  local changed=
+  local changed= file
+  local pending=()
   [ -f "$SNIPPET" ] || return 0
-  # don't touch anything while the current config is broken for other reasons
-  nginx -t > /dev/null 2>&1 || return 0
 
+  # cheap check first (only greps), nginx -t runs only when a conf needs the route
   for file in "$SITES_DIR"/*; do
     [ -f "$file" ] || continue
     grep -q "c9-ide.conf" "$file" && continue
     grep -qE '^[[:space:]]*server[[:space:]]*\{' "$file" || continue
     grep -qF "$(md5sum "$file" | cut -d' ' -f1) $file" "$SKIP_FILE" 2> /dev/null && continue
+    pending+=("$file")
+  done
+  [ ${#pending[@]} -eq 0 ] && return 0
 
+  # don't touch anything while the current config is broken for other reasons
+  nginx -t > /dev/null 2>&1 || return 0
+
+  for file in "${pending[@]}"; do
     local backup
     backup="$(mktemp)"
     cp "$file" "$backup"
