@@ -141,7 +141,7 @@ COPY initial_command.sh .
 RUN chmod +x initial_command.sh
 
 WORKDIR /root/pm2-server-managers
-RUN chmod a+x detect-git-repo-deployment.sh
+RUN chmod a+x detect-git-repo-deployment.sh ensure-ide-route.sh
 
 
 # export all env to /env.sh file at build time

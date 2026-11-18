@@ -40,6 +40,8 @@ if [ -f "setup-nginx.sh" ]; then
   chmod a+x setup-nginx.sh
   ./setup-nginx.sh || echo "Seems like there is an error in setup-nginx.sh"
 	echo "setup-nginx.sh executed"
+  # expose the IDE at <DOMAIN_NAME>/ide in the project's server block(s) right away
+  /root/pm2-server-managers/ensure-ide-route.sh --reload
 fi
 # check if setup-cron is present
 if [ -f "setup-cron.sh" ]; then

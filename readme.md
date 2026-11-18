@@ -14,11 +14,12 @@ nginx listens on port `8080`:
 - `/` → the main application on `127.0.0.1:3000`. Until a `GIT_REPO` is deployed, a small sample app ([sample-app](sample-app)) answers there.
 
 So one domain is enough: `https://domain.com/` for the app and `https://domain.com/ide/` for the IDE.
-To expose the IDE on your own nginx `server {}` blocks (e.g. the ones created by `setup-nginx.sh`), add:
 
-```nginx
-include /etc/nginx/snippets/c9-ide.conf;
-```
+Nothing to change in deployed projects: [ensure-ide-route.sh](pm2-server-managers/ensure-ide-route.sh) adds
+`include /etc/nginx/snippets/c9-ide.conf;` to every `server {}` block in `/etc/nginx/sites-enabled` — at start,
+right after `setup-nginx.sh` and every 10s (in case a project regenerates its conf). So with `DOMAIN_NAME` set,
+`https://$DOMAIN_NAME/ide/` works automatically. If a conf can't take the route (e.g. it defines its own `/ide`
+location, `nginx -t` fails), it is left unchanged.
 
 ## Variable
 
