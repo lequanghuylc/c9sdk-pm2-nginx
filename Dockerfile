@@ -35,7 +35,10 @@ RUN apt-get update \
 
 WORKDIR /root
 
-RUN git clone https://github.com/c9/core.git c9sdk
+# c9sdk fork with sub path (C9_SUB_PATH) + new Node.js support
+ARG C9SDK_REPO=https://github.com/lequanghuylc/c9sdk.git
+ARG C9SDK_BRANCH=feature/sub-path-node22
+RUN git clone --branch "$C9SDK_BRANCH" "$C9SDK_REPO" c9sdk
 
 WORKDIR /root/c9sdk
 
@@ -62,15 +65,11 @@ RUN apt install -y lld libevent-dev libbsd-dev
 
 RUN apt install -y locales-all
 
-RUN scripts/install-sdk.sh
-
-# RUN npm i -g pm2
-
-COPY ./nginx/project.conf /etc/nginx/sites-enabled/
-
 ARG DEBIAN_FRONTEND=noninteractive
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 ENV NVM_DIR /usr/local/nvm
+# Node.js used by the IDE server, its file/terminal worker and as default node in the container
+ARG NODE_VERSION=24
 
 RUN mkdir -p "$NVM_DIR"; \
     curl -o- \
@@ -78,13 +77,42 @@ RUN mkdir -p "$NVM_DIR"; \
         bash \
     ; \
     source $NVM_DIR/nvm.sh; \
-    nvm install 12 && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/node" "/usr/local/bin/node" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npm" "/usr/local/bin/npm" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/pm2" "/usr/local/bin/pm2" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/yarn" "/usr/local/bin/yarn"
+    nvm install $NODE_VERSION && nvm alias default $NODE_VERSION && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/node" "/usr/local/bin/node" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npm" "/usr/local/bin/npm" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npx" "/usr/local/bin/npx" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/pm2" "/usr/local/bin/pm2" && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/yarn" "/usr/local/bin/yarn"
 
 RUN npm i -g pm2 yarn
+
+# Cloud9 dependencies in ~/.c9. The official installer would download node v6 and build
+# pty.js for it (no longer installable). Instead ~/.c9/node points to the Node.js above and
+# the installer only sets up tmux + nak ("collab" is disabled in standalone mode).
+RUN source $NVM_DIR/nvm.sh \
+  && mkdir -p /root/.c9 \
+  && ln -s "$NVM_DIR/versions/node/$(nvm version)" /root/.c9/node \
+  && curl -fsSL https://raw.githubusercontent.com/c9/install/master/install.sh | bash -s install tmux nak
+
+# Terminal support: node-pty built for the Node.js above (node-gyp needs python3)
+ARG NODE_PTY_VERSION=1.1.0
+RUN apt-get update && apt-get install -y python3 \
+  && mkdir -p /tmp/node-pty && cd /tmp/node-pty \
+  && npm init -y > /dev/null \
+  && npm install --no-audit --no-fund node-pty@$NODE_PTY_VERSION \
+  && cp -r node_modules/node-pty node_modules/node-addon-api /root/.c9/node_modules/ \
+  && cd / && rm -rf /tmp/node-pty \
+  && /root/.c9/node/bin/node -e "require('/root/.c9/node_modules/node-pty'); console.log('node-pty OK on', process.version)"
+
+# install the IDE's node modules (global deps are already in ~/.c9)
+# NO_PULL: keep the cloned fork as is (don't merge upstream c9/core)
+RUN NO_PULL=1 scripts/install-sdk.sh
+
+COPY ./nginx/c9-ide.conf /etc/nginx/snippets/c9-ide.conf
+COPY ./nginx/project.conf /etc/nginx/sites-enabled/
 
 RUN rm /etc/nginx/sites-enabled/project.conf.template
 
 ARG C9SDK_PASSWORD=password
+
+# The IDE is served at http://<domain>/ide/ (see nginx/c9-ide.conf), the root path is
+# left for the main application (sample app in /root/sample-app until a GIT_REPO is deployed)
+ENV C9_SUB_PATH=/ide
 
 COPY .bashrc /tmp/.bashrc
 RUN cat /tmp/.bashrc >> /root/.bashrc
@@ -103,6 +131,8 @@ RUN apt install -y supervisor gettext-base
 COPY supervisord.conf.template /etc/supervisor/conf.d/
 RUN envsubst < /etc/supervisor/conf.d/supervisord.conf.template > /etc/supervisor/conf.d/supervisord.conf
 COPY pm2-server-managers /root/pm2-server-managers
+COPY sample-app /root/sample-app
+RUN chmod +x /root/sample-app/start.sh
 
 RUN apt update && apt install rsync -y
 

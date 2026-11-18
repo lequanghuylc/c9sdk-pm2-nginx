@@ -15,6 +15,13 @@ command=nginx -g "daemon off;"
 [program:cron]
 command=cron -f
 
+[program:sample-app]
+command=/root/sample-app/start.sh
+autorestart=unexpected
+exitcodes=0
+stdout_logfile=/root/sample-app/logfile.log
+stderr_logfile=/root/sample-app/error.log
+
 [program:initial_command]
 command=/root/initial_command.sh
 stdout_logfile=/root/initial_command.log

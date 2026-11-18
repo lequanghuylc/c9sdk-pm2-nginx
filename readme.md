@@ -2,9 +2,23 @@
 
 ![demo](demo.png)
 
-This Docker container is a IDE / Code editor, built from [C9 SDK](https://github.com/c9/core). With C9 IDE you can set up development environments in the cloud. It comes with [nvm](https://nvm.sh/), [pm2](https://pm2.keymetrics.io/) and [nginx](https://www.nginx.com/) that can help you publish your application pulically accessible to the world.
+This Docker container is a IDE / Code editor, built from [C9 SDK](https://github.com/c9/core) ([fork](https://github.com/lequanghuylc/c9sdk) with sub path + new Node.js support). With C9 IDE you can set up development environments in the cloud. It comes with [nvm](https://nvm.sh/), [pm2](https://pm2.keymetrics.io/) and [nginx](https://www.nginx.com/) that can help you publish your application pulically accessible to the world.
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EjubUu?referralCode=kmHOLH)
+
+## Routing
+
+nginx listens on port `8080`:
+
+- `/ide/` → the Cloud9 IDE (basic auth `c9sdk:$C9SDK_PASSWORD`)
+- `/` → the main application on `127.0.0.1:3000`. Until a `GIT_REPO` is deployed, a small sample app ([sample-app](sample-app)) answers there.
+
+So one domain is enough: `https://domain.com/` for the app and `https://domain.com/ide/` for the IDE.
+To expose the IDE on your own nginx `server {}` blocks (e.g. the ones created by `setup-nginx.sh`), add:
+
+```nginx
+include /etc/nginx/snippets/c9-ide.conf;
+```
 
 ## Variable
 
@@ -12,6 +26,13 @@ This Docker container is a IDE / Code editor, built from [C9 SDK](https://github
 - `GIT_REPO`: automatic git repo deployment
 - `GIT_BRANCH`: target branch, if not present, default branch will be used.
 - `INITIAL_COMMAND`: custom command that can be used for installing custom dependencies or even start your git repo your own way
+- `C9_SUB_PATH`: sub path of the IDE, default `/ide`. If you change it, change `nginx/c9-ide.conf` too. Set it to an empty string to serve the IDE at the root again.
+- `SAMPLE_APP`: set to `false` to disable the sample root app (it is disabled automatically when `GIT_REPO` is set).
+
+## Build args
+
+- `NODE_VERSION` (default `24`): Node.js version of the IDE server, its file/terminal worker and the default `node` in the container.
+- `C9SDK_REPO` / `C9SDK_BRANCH`: which c9sdk repository / branch to build.
 
 ## What is the best use case for this?
 
