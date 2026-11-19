@@ -1,1 +1,1 @@
-docker buildx build --platform linux/amd64 -f Dockerfile --no-cache -t lequanghuylc/c9sdk-pm2-ubuntu:railway .
+docker buildx build --platform linux/amd64 -f Dockerfile --no-cache -t lequanghuylc/c9sdk-pm2-ubuntu:node24 .
